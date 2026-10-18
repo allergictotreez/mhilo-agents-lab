@@ -54,7 +54,7 @@ export function run({
 
   const url = pushUrl();
   const pusher = push && process.env.AGENTS_NO_PUSH !== '1' && url ? new Pusher({ url, log }) : null;
-  if (!pusher) log(url || !push || process.env.AGENTS_NO_PUSH === '1' ? 'push disabled' : 'push disabled: no push URL set up, so this Mac only');
+  if (!pusher) log(url || !push || process.env.AGENTS_NO_PUSH === '1' ? 'push disabled' : 'push disabled: no push URL set up, so this computer only');
 
   let lastBytes = 0;
   let lastCpu = process.cpuUsage();
