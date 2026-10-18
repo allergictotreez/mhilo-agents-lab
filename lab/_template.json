@@ -1,0 +1,16 @@
+{
+  "$comment": "Copy to lab/<project-id>.json to give a project its own wing. Every field below is read by collector/classify.mjs and site/lab/scene.mjs; nothing else needs to change. A project with no file gets the Workshop wing: Build, Design and Research. match.cwd are basename globs of the checkout folders that belong to this project (worktrees included: 'myproject-*'). Each area: id (stable, lower-case), label (the sign over the bench), tint (a hex color for the area's floodlight strip), keywords (matched in a session's title and an agent's description, case-insensitive), paths (globs matched against the file paths in recent Read/Edit/Write tool inputs, relative to the checkout). Keep 3 to 9 areas, titled after the work done in this project: a wing needs at least 3 (fewer and the file is ignored; its sessions go to the Workshop), the floor is laid out in rows of three (a row fills before the next starts), and signage gets small past nine. fallback (optional): the area id a session matching nothing goes to; without it, the lobby.",
+  "id": "my-project",
+  "label": "My Project",
+  "color": "#FFB703",
+  "match": {
+    "cwd": ["my-project", "my-project-*"]
+  },
+  "areas": [
+    { "id": "frontend", "label": "Frontend", "tint": "#4FF2E0", "keywords": ["ui", "page", "component", "css"], "paths": ["src/**", "site/**"] },
+    { "id": "backend", "label": "Backend", "tint": "#76C893", "keywords": ["api", "server", "database", "auth"], "paths": ["server/**", "api/**"] },
+    { "id": "content", "label": "Content", "tint": "#F5EBD7", "keywords": ["copy", "content", "blog", "marketing"], "paths": ["content/**", "docs/marketing/**"] },
+    { "id": "platform", "label": "Platform & Deploy", "tint": "#8FA3BB", "keywords": ["deploy", "build", "ci", "hosting"], "paths": [".github/**", "docs/deploy/**"] },
+    { "id": "research", "label": "Research", "tint": "#5E586D", "keywords": ["explore", "find", "investigate", "plan", "how"], "paths": ["docs/**"] }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents.mhilo.com/schema/index.schema.json",
+  "title": "mhilo agents — the project index (the tab bar)",
+  "$comment": "Returned by GET api.php?action=state with no project. Built by api.php from data/*.json on each push (stored as data/index.json), and by collector/serve.mjs locally. Counts are derived from the snapshot: busy/idle/stalled/error count sessions by status; agents counts agents with finishedAt null. projects[].at is the feed's freshness, not the content's: the time the server last received a push for that project (hosted) or the collector's last successful tick (local). The collector pushes at least every 60 s even when nothing changed, so a project whose at is older than 180 s means the feed is down; the site says so on the tab and over the floor.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "at",
+    "projects"
+  ],
+  "properties": {
+    "v": {
+      "type": "integer",
+      "enum": [
+        1
+      ]
+    },
+    "at": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "projects": {
+      "type": "array",
+      "maxItems": 30,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "colour",
+          "at",
+          "counts"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "colour": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "at": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "counts": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "busy",
+              "idle",
+              "stalled",
+              "error",
+              "agents"
+            ],
+            "properties": {
+              "busy": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "idle": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "stalled": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "error": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "agents": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

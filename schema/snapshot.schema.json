@@ -1,0 +1,358 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agents.mhilo.com/schema/snapshot.schema.json",
+  "title": "mhilo agents — one project's snapshot",
+  "$comment": "The contract between collector/ and site/. Both validate against it with schema/validate.mjs (a stdlib subset: type, required, properties, additionalProperties, items, enum, minLength, maxLength, pattern, minimum, maxItems, $ref to #/$defs). Redaction lives here: no free-text field over 120 chars, tool hints at most 60, no prompt text anywhere. Timestamps are epoch milliseconds. Agents whose finishedAt is set are kept for up to 60 s after finishing so the site can play the leave animation; a client that first sees an agent already finished does not spawn it. tokens and costUSD are null when unknown — e.g. a transcript first seen mid-file (tail-seeked) with no cost-state line read; never present a partial sum as a total. A snapshot with sessions: [] is valid and is how the collector retires a wing (it pushes one empty snapshot when a project's last session ends). The serialised snapshot must stay under 400 KB: the collector drops finished agents, then the oldest-active agents of the largest crews, until it fits.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "v",
+    "project",
+    "label",
+    "colour",
+    "at",
+    "areas",
+    "sessions"
+  ],
+  "properties": {
+    "v": {
+      "type": "integer",
+      "enum": [
+        1
+      ]
+    },
+    "project": {
+      "$ref": "#/$defs/id"
+    },
+    "label": {
+      "$ref": "#/$defs/label"
+    },
+    "colour": {
+      "$ref": "#/$defs/hex"
+    },
+    "at": {
+      "$ref": "#/$defs/ms"
+    },
+    "areas": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "$ref": "#/$defs/area"
+      }
+    },
+    "sessions": {
+      "type": "array",
+      "maxItems": 60,
+      "items": {
+        "$ref": "#/$defs/session"
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "text": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "hex": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$"
+    },
+    "ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "msOrNull": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "area": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "tint"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "$ref": "#/$defs/label"
+        },
+        "tint": {
+          "$ref": "#/$defs/hex"
+        }
+      }
+    },
+    "tool": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "hint",
+        "since"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "hint": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "since": {
+          "$ref": "#/$defs/ms"
+        }
+      }
+    },
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "description",
+        "model",
+        "startedAt",
+        "finishedAt",
+        "lastActivity",
+        "tool",
+        "area",
+        "depth",
+        "workflow"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "description": {
+          "$ref": "#/$defs/text"
+        },
+        "model": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "startedAt": {
+          "$ref": "#/$defs/ms"
+        },
+        "finishedAt": {
+          "$ref": "#/$defs/msOrNull"
+        },
+        "lastActivity": {
+          "$ref": "#/$defs/ms"
+        },
+        "tool": {
+          "$ref": "#/$defs/tool"
+        },
+        "area": {
+          "$ref": "#/$defs/id"
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "workflow": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64
+        }
+      }
+    },
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "status",
+        "agents",
+        "startedAt"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "$ref": "#/$defs/label"
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "agents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "startedAt": {
+          "$ref": "#/$defs/ms"
+        }
+      }
+    },
+    "session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "title",
+        "cwd",
+        "branch",
+        "status",
+        "startedAt",
+        "busySince",
+        "lastActivity",
+        "model",
+        "effort",
+        "costUSD",
+        "tokens",
+        "tool",
+        "area",
+        "areaWhy",
+        "agents",
+        "workflows"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "$ref": "#/$defs/text"
+        },
+        "title": {
+          "$ref": "#/$defs/text"
+        },
+        "cwd": {
+          "type": "string",
+          "maxLength": 120,
+          "pattern": "^[^/~]*$",
+          "$comment": "basename of the checkout only, never a path"
+        },
+        "branch": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 120
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "busy",
+            "idle",
+            "error",
+            "stalled"
+          ]
+        },
+        "startedAt": {
+          "$ref": "#/$defs/ms"
+        },
+        "busySince": {
+          "$ref": "#/$defs/msOrNull"
+        },
+        "lastActivity": {
+          "$ref": "#/$defs/ms"
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 64
+        },
+        "effort": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 16
+        },
+        "costUSD": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "tokens": {
+          "$ref": "#/$defs/tokensOrNull"
+        },
+        "tool": {
+          "$ref": "#/$defs/tool"
+        },
+        "area": {
+          "$ref": "#/$defs/id"
+        },
+        "areaWhy": {
+          "$ref": "#/$defs/text"
+        },
+        "agents": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {
+            "$ref": "#/$defs/agent"
+          }
+        },
+        "workflows": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/workflow"
+          }
+        }
+      }
+    },
+    "tokensOrNull": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "in",
+        "out",
+        "cacheRead"
+      ],
+      "properties": {
+        "in": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "out": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cacheRead": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

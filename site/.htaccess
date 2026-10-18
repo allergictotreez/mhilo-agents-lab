@@ -1,0 +1,60 @@
+# agents.mhilo.com (Hostinger: Apache-compatible LiteSpeed).
+# What is never served, what PHP must be handed, and how long things may be cached.
+Options -Indexes
+
+# The bcrypt hash and the push-token digest.
+<Files "secret.php">
+  Require all denied
+</Files>
+# Dotfiles (this file, data/.lock, the atomic-write temporaries), notes that are not the page, and
+# any log PHP or the host leaves here (error_log, php_error_log, *.log).
+<FilesMatch "(^\.|\.(md|sh|log)$|_log$|^error_log$)">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # data/: live snapshots, the index, lockouts and sessions. data/.htaccess denies it again.
+  # [NC]: on a case-insensitive disk /DATA/ is the same folder.
+  RewriteRule (^|/)data(/|$) - [F,L,NC]
+  # PHP under FastCGI / LSAPI drops the Authorization header unless it is passed through:
+  # without this the collector's bearer push always gets 401.
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+# Without mod_rewrite, data/ is still refused (and data/.htaccess says the same).
+RedirectMatch 403 (?i)(^|/)data(/|$)
+
+# Module scripts are refused by the browser unless served as JavaScript.
+AddType text/javascript .js .mjs
+AddType model/gltf-binary .glb
+AddType application/json .json
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "same-origin"
+  Header always set X-Frame-Options "DENY"
+  # Scripts: our own files plus the one inline import map, by hash. When the import map in
+  # index.html changes, its hash here must change too (tests/site/static.test.mjs checks they agree).
+  # Styles: our own files and Google Fonts' stylesheet; fonts from Google's font host.
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-F9cUpOGr38ZFZP5u+GY1h0E+mn5wx57bjXZAprW5ddk='; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+  # The page and our own modules, by name: revalidate every load, so a deploy shows at once.
+  # Named rather than by extension so the vendored three.js files are not caught: a <FilesMatch>
+  # here is applied after a sub-folder's own .htaccess, so it would override any vendor cache rule.
+  <FilesMatch "^(index\.html|app\.js|app\.css|tokens\.css|props\.json|art\.json|[a-z]+\.mjs)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  # Vendored three.js 0.185.1: 30 days. An upgrade must change these URLs (rename vendor/three and
+  # the import map) or browsers keep the old copy until it expires.
+  <FilesMatch "^(three\.(module|core)\.min\.js|GLTFLoader\.js|SkeletonUtils\.js|BufferGeometryUtils\.js)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+  # The API: never stored anywhere (api.php also sends this itself).
+  <FilesMatch "^api\.php$">
+    Header set Cache-Control "no-store"
+  </FilesMatch>
+  # The characters change rarely; a week.
+  <FilesMatch "\.glb$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+</IfModule>

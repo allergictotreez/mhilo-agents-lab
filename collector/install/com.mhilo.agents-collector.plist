@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  The mhilo agents collector as a per-user LaunchAgent. install.sh replaces __NODE__, __REPO__
+  and __HOME__ (launchd expands neither ~ nor $HOME) and copies the result to
+  ~/Library/LaunchAgents. It runs collector/main.mjs: the local view on 127.0.0.1:8777 and the
+  push to a hosted site (skipped until ~/.config/mhilo-agents/push-url and token exist).
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.mhilo.agents-collector</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>__NODE__</string>
+    <string>__REPO__/collector/main.mjs</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>__REPO__</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key>
+    <string>__HOME__</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>LowPriorityIO</key>
+  <true/>
+  <key>Nice</key>
+  <integer>5</integer>
+  <key>StandardOutPath</key>
+  <string>__HOME__/Library/Logs/mhilo-agents/collector.log</string>
+  <key>StandardErrorPath</key>
+  <string>__HOME__/Library/Logs/mhilo-agents/collector.err.log</string>
+</dict>
+</plist>

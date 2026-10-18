@@ -1,0 +1,107 @@
+/*
+ * tokens.css — THE canonical design tokens for this project.
+ *
+ * ⚠ THIS FILE IS THE SOURCE OF TRUTH. Edit colours and scales HERE, never in a
+ *   component. `npm run sync-starter` never overwrites this file — the moment you
+ *   set a palette it becomes the most project-specific file in the repo.
+ *
+ * TWO LAYERS, and the split is the whole point:
+ *
+ *   Layer 1 — YOURS.     --brand-* and the scales. This is what you change.
+ *   Layer 2 — none here. This project has no component kit; see the note below.
+ *
+ * Change a --brand-* value and every component follows. That is what keeps
+ * "restyle the app" a one-file edit. Palette: mhilo.com's, dark only.
+ */
+
+:root {
+  /* ══ LAYER 1 — YOURS ═══════════════════════════════════════════════════════ */
+
+  /* — Palette: MHILO.COM (mhilo-site/styles.css), dark only — the owner, 2026-10-17 —
+     The site's ink as the ground, its paper as text, its smoke greys, and tomato as THE accent.
+     Status colours (electric, danger, success) are this page's own: mhilo.com has none. Named by ROLE.
+     ⚠ --brand-surface must stay a DARK rgb: the 3D floor reads its rgb (alpha dropped). */
+  --brand-ground:   #0b0b0b;                 /* mhilo "ink" — page and scene background */
+  --brand-surface:  rgba(26, 26, 25, .78);   /* panels, cards, the login plate */
+  --brand-sunken:   rgba(5, 5, 5, .72);      /* wells, insets, labels */
+  --brand-ink:      #f7f6f1;                 /* mhilo "paper" — primary text */
+  --brand-muted:    #a8a8a4;                 /* mhilo "smoke-dark" — secondary text; idle status */
+  --brand-dim:      #8a8a86;                 /* mhilo "smoke" — tertiary text, captions */
+  --brand-hair:     rgba(247, 246, 241, .1); /* mhilo "line-dark" — hairlines, borders */
+  --brand-accent:   #ff5d3b;                 /* mhilo "tomato" — key accents and primary CTAs */
+  --brand-accent-hot: #ff7a5c;               /* tomato hover / active */
+  --brand-on-accent: #0b0b0b;                /* text ON tomato (6.3:1) */
+  --brand-electric: #4FF2E0;                 /* busy / live */
+  --brand-danger:   #D90429;                 /* stalled, error, destructive */
+  --brand-warning:  #FFB703;
+  --brand-success:  #76C893;                 /* done */
+  --brand-board:    #26392e;                 /* the area chalkboards: dark green, chalk is --brand-ink (the owner) */
+
+  /* — Radius — ONE knob for every rectangle, plus pill for round things.
+     Resist re-adding sm/md/lg tiers: three radii read as three design systems. */
+  --radius: 4px;
+  --radius-pill: 999px;
+
+  /* — Spacing scale (base-4) — */
+  --space-1: 4px;   --space-2: 8px;   --space-3: 12px;  --space-4: 16px;
+  --space-5: 20px;  --space-6: 24px;  --space-8: 32px;  --space-10: 40px;  --space-12: 48px;
+
+  /* — Semantic rhythm — reach for these in forms before the raw scale.
+     They keep every form in the app breathing the same way. */
+  --space-label: 8px;     /* label → its input */
+  --space-field: 24px;    /* field → next field */
+  --space-section: 48px;  /* group → group */
+
+  /* — Controls — inputs AND buttons share ONE height scale.
+     An input and the button beside it are never different heights. */
+  --control-h-sm: 32px;   /* toolbars, tabs, dense actions */
+  --control-h: 40px;      /* DEFAULT — inputs and md buttons */
+  --control-h-lg: 48px;   /* standalone CTAs */
+  --control-px: 16px;     /* input side padding — text never touches an edge */
+  --btn-px: 20px;         /* button side padding */
+  --touch-target: 44px;   /* ⚠ minimum tap target on any touch surface. Not negotiable. */
+
+  /* — Typefaces — */
+  /* Barlow Condensed 800 for display (signage, wordmark, tabs), Barlow 500 for body. */
+  --font-display: 'Barlow Condensed', system-ui, sans-serif;
+  --font-body: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --weight-display: 800;
+  --weight-body: 500;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* — Type scale (base-4) —
+     ⚠ If you adopt a heavy display face, set a size floor for it. A poster grotesk
+       below ~28px closes its counters and reads as a smudge. Put the floor in a
+       comment here so the next session does not "fix" it. */
+  --text-display-xl: 36px;
+  --text-display-lg: 28px;
+  --text-title: 24px;
+  --text-heading: 20px;
+  --text-body: 16px;      /* ⚠ never below 16px on a form input — iOS zooms on focus */
+  --text-ui: 14px;
+  --text-caption: 12px;
+  --leading-tight: 1.15;
+  --leading-body: 1.55;
+
+  /* — Elevation — */
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.4);
+  --shadow: 0 2px 8px oklch(0 0 0 / 0.5);
+  --shadow-lg: 0 8px 28px oklch(0 0 0 / 0.6);
+
+  /* — Motion — durations short enough to feel instant, easing that decelerates.
+     See /impeccable and the emil-design-eng pack before inventing new curves. */
+  --ease-out: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 320ms;
+
+  /* ══ LAYER 2 — none ════════════════════════════════════════════════════════
+     No component kit (plain ES modules, no shadcn): components read layer 1
+     directly. See DECISIONS.md 2026-10-17. */
+}
+
+/* Respect the user's setting. Every transition above should collapse, not just shrink. */
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-fast: 0ms; --dur: 0ms; --dur-slow: 0ms; }
+}

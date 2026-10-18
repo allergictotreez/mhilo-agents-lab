@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>mhilo agents</title>
+<meta name="description" content="A live R&amp;D-lab view of every Claude Code session on one computer.">
+<meta name="robots" content="noindex, nofollow">
+
+<!-- Barlow / Barlow Condensed: app.js adds the stylesheet once the page is up, so it never blocks
+     rendering and needs no inline handler; with no network the system face is used. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%230b0b0b'/%3E%3Cpath d='M6 24V8h4l6 9 6-9h4v16h-4V15l-6 8-6-8v9z' fill='%23ff5d3b'/%3E%3C/svg%3E">
+
+<!-- Canonical tokens, symlinked from ../design/tokens.css. -->
+<link rel="stylesheet" href="tokens.css">
+
+<link rel="stylesheet" href="app.css">
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three/build/three.module.min.js",
+    "three/addons/": "./vendor/three/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="app.js"></script>
+</head>
+<body>
+
+<section id="login" hidden aria-labelledby="login-title">
+  <form class="plate" id="login-form" novalidate>
+    <h1 id="login-title" class="display">mhilo <span class="accent">agents</span></h1>
+    <p>Private. Sign in to see the lab.</p>
+    <input type="text" name="username" autocomplete="username" value="owner" hidden>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+    </div>
+    <button class="btn btn-primary" id="login-button" type="submit">Sign in</button>
+    <p class="msg" id="login-msg" role="status" aria-live="polite"></p>
+    <p class="alt"><a href="./">Back to the page</a></p>
+  </form>
+</section>
+
+<div id="page" hidden>
+  <nav class="site-nav" aria-label="Page">
+    <a class="site-mark" href="#top"><span class="display">mhilo</span><span class="mark-dot" aria-hidden="true"></span><span class="display">agents</span></a>
+    <div class="site-jumps">
+      <a href="#what">What you see</a>
+      <a href="#how">How it works</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#run">Run it yourself</a>
+    </div>
+    <a class="site-link" id="nav-action" href="./?signin=1">Sign in</a>
+  </nav>
+
+  <main id="top">
+    <section class="masthead" id="masthead" aria-label="The lab">
+    <div id="lab" data-view="banner">
+      <header class="bar">
+        <p class="wordmark display">mhilo <span>agents</span></p>
+        <nav class="tabs" id="tabs" role="tablist" aria-label="Projects"></nav>
+        <div class="meta">
+          <span class="badge" id="local-badge" hidden>Local</span>
+          <span class="badge" id="demo-badge" data-tone="demo" title="Simulated sessions, not live ones" hidden>Demo</span>
+          <span class="status" id="status" role="status" aria-live="polite"></span>
+          <time class="clock" id="clock"></time>
+          <button class="btn btn-quiet" id="logout" type="button" hidden>Sign out</button>
+          <a class="btn btn-quiet" id="signin" href="./?signin=1" hidden>Sign in</a>
+          <button class="btn btn-quiet btn-icon" id="close-lab" type="button" aria-label="Close the full view" title="Close (Esc)">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M9 3v6H3M15 3v6h6M9 21v-6H3M15 21v-6h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </header>
+      <main id="stage" aria-label="The lab floor">
+        <div id="hud"></div>
+        <p class="feed" id="feed" role="status" hidden></p>
+        <p class="empty" id="empty" hidden></p>
+        <p class="note" id="note" hidden></p>
+        <aside id="panel" hidden aria-labelledby="panel-title">
+          <button class="panel-close" id="panel-close" type="button" aria-label="Close">×</button>
+          <div id="panel-body"></div>
+        </aside>
+      </main>
+    </div>
+      <button class="masthead-open" id="open-lab" type="button" aria-describedby="masthead-label">
+        <span class="masthead-caption"><span class="live-dot" aria-hidden="true"></span><span id="masthead-label">Demo: made-up projects, simulated sessions</span></span>
+        <span class="masthead-cta">Open the lab
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+    </section>
+
+    <section class="section hero">
+      <div class="section-inner">
+        <p class="kicker"><span class="kicker-dot"></span>For Claude Code</p>
+        <h1 class="hero-mark display">mhilo agents<span class="mark-dot" aria-hidden="true"></span></h1>
+        <p class="hero-line">Every Claude Code session on your computer, drawn as a lab: who is working on what, where, and for how long.</p>
+        <div class="hero-actions">
+          <button class="btn btn-accent" type="button" data-open-lab>Open the lab</button>
+          <a class="text-link" href="#how">How it works<span class="link-arrow" aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section about">
+      <div class="section-inner">
+        <p class="kicker"><span class="kicker-dot"></span>Why</p>
+        <h2 class="headline">Ten sessions, one glance.</h2>
+        <p class="body">Run a few Claude Code sessions at once and the terminal stops telling you much. Which one is waiting on you? Which one has been on the same test for twenty minutes? Which agent is still out? The lab answers by putting everyone somewhere you can see them.</p>
+      </div>
+    </section>
+
+    <section class="section section--paper what" id="what">
+      <div class="section-inner">
+        <p class="kicker"><span class="kicker-dot"></span>What you see · 6</p>
+        <ol class="features">
+          <li class="feature">
+            <span class="feature-num">01</span>
+            <div class="feature-body">
+              <div class="feature-head"><h3 class="feature-name">A wing per project</h3><span class="feature-type">tabs · counts</span></div>
+              <p class="feature-desc">Each project gets its own floor. Its tab counts the sessions that are busy, idle or stalled, so you know where to look before you switch.</p>
+            </div>
+          </li>
+          <li class="feature">
+            <span class="feature-num">02</span>
+            <div class="feature-body">
+              <div class="feature-head"><h3 class="feature-name">A pod per area of work</h3><span class="feature-type">pods · chalkboards</span></div>
+              <p class="feature-desc">A wing is split into the areas you work in: Search, Payments, Audio, whatever the project has. Each pod's chalkboard lists the work going on there now, and its lamp is on while someone is inside.</p>
+            </div>
+          </li>
+          <li class="feature">
+            <span class="feature-num">03</span>
+            <div class="feature-body">
+              <div class="feature-head"><h3 class="feature-name">A worker per session</h3><span class="feature-type">busy · idle</span></div>
+              <p class="feature-desc">Every session is a lab worker. Busy, it stands at its pod's bench. Idle, it walks back to a desk in the lobby and waits for you.</p>
+            </div>
+          </li>
+          <li class="feature">
+            <span class="feature-num">04</span>
+            <div class="feature-body">
+              <div class="feature-head"><h3 class="feature-name">Agents walk out to help</h3><span class="feature-type">subagents</span></div>
+              <p class="feature-desc">When a session sends out an agent, a new worker walks to the pod it is working in. When the agent finishes, it heads for the door.</p>
+            </div>
+          </li>
+          <li class="feature">
+            <span class="feature-num">05</span>
+            <div class="feature-body">
+              <div class="feature-head"><h3 class="feature-name">A card for every worker</h3><span class="feature-type">click a worker</span></div>
+              <p class="feature-desc">Title, model, effort, time on the task, tokens, cost and the tool in use right now. A session's card lists its agents too.</p>
+            </div>
+          </li>
+          <li class="feature">
+            <span class="feature-num">06</span>
+            <div class="feature-body">
+              <div class="feature-head"><h3 class="feature-name">Trouble is a color and a word</h3><span class="feature-type">stalled · error</span></div>
+              <p class="feature-desc">A session that goes quiet for fifteen minutes in the middle of a task turns red and says stalled. No sound, no pop-up.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section how" id="how">
+      <div class="section-inner">
+        <p class="kicker"><span class="kicker-dot"></span>How it works</p>
+        <h2 class="headline">Read on your computer, drawn in the browser.</h2>
+        <ol class="steps">
+          <li class="step">
+            <span class="step-num">1</span>
+            <h3 class="step-name">The collector</h3>
+            <p class="step-desc">A small Node process on your computer watches Claude Code's session list and the end of each transcript. It keeps names, tools, counts and times, and drops the rest.</p>
+          </li>
+          <li class="step">
+            <span class="step-num">2</span>
+            <h3 class="step-name">The snapshot</h3>
+            <p class="step-desc">It sends one short summary per project when something changes, and at least once a minute. The page says so if a project goes quiet for three.</p>
+          </li>
+          <li class="step">
+            <span class="step-num">3</span>
+            <h3 class="step-name">The lab</h3>
+            <p class="step-desc">This page draws the summary in 3D and asks for a new one every five seconds. It runs in any modern browser, on a phone too.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section section--paper privacy" id="privacy">
+      <div class="section-inner">
+        <p class="kicker"><span class="kicker-dot"></span>Privacy</p>
+        <h2 class="headline">Titles and times. Never your prompts.</h2>
+        <div class="lists">
+          <div>
+            <h3 class="list-head">What leaves your computer</h3>
+            <ul class="list-plain">
+              <li>Session titles and agent descriptions</li>
+              <li>Tool names, with a hint of up to 60 characters: a command's first words or a file's name</li>
+              <li>Token counts, cost and timestamps</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="list-head">What never does</h3>
+            <ul class="list-plain">
+              <li>Prompt text or replies</li>
+              <li>File contents</li>
+              <li>Paths outside the project folder</li>
+              <li>Keys, passwords or access tokens</li>
+            </ul>
+          </div>
+        </div>
+        <p class="body">The real lab is behind a password, and five wrong tries lock sign-in for fifteen minutes. Visitors see a demo at the top of this page instead: invented projects and simulated sessions, made up in their own browser.</p>
+      </div>
+    </section>
+
+    <section class="section run" id="run">
+      <div class="section-inner">
+        <p class="kicker"><span class="kicker-dot"></span>Run it yourself</p>
+        <h2 class="headline">Your sessions, on your computer.</h2>
+        <p class="body">Free and open source under the MIT license. It runs on your computer and stays there: no account, and nothing is sent anywhere unless you host your own copy.</p>
+        <ol class="steps run-steps">
+          <li class="step">
+            <span class="step-num">1</span>
+            <h3 class="step-name">Download it</h3>
+            <code>git clone https://github.com/allergictotreez/mhilo-agents-lab.git</code>
+          </li>
+          <li class="step">
+            <span class="step-num">2</span>
+            <h3 class="step-name">Start it</h3>
+            <code>cd mhilo-agents-lab
+npm start</code>
+            <p class="step-desc">Needs Node.js 20 or newer and Claude Code. Built on macOS; Windows and Linux should work too.</p>
+          </li>
+          <li class="step">
+            <span class="step-num">3</span>
+            <h3 class="step-name">Open the lab</h3>
+            <code>http://127.0.0.1:8777</code>
+            <p class="step-desc">Your sessions appear within a few seconds.</p>
+          </li>
+        </ol>
+        <div class="hero-actions run-actions">
+          <a class="btn btn-accent" href="https://github.com/allergictotreez/mhilo-agents-lab">Get it on GitHub</a>
+          <a class="text-link" href="https://github.com/allergictotreez/mhilo-agents-lab#set-it-up">Full setup guide<span class="link-arrow" aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section closer">
+      <div class="section-inner">
+        <p class="kicker"><span class="kicker-dot"></span>See it move</p>
+        <button class="big-link display" type="button" data-open-lab>Open the lab<span class="link-arrow" aria-hidden="true">↗</span></button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <span>mhilo agents</span>
+    <a class="text-link" href="https://mhilo.com">Part of mhilo<span class="link-arrow" aria-hidden="true">↗</span></a>
+  </footer>
+</div>
+
+<section id="boot" class="empty fixed" role="status">Loading the lab.</section>
+<noscript><p class="empty fixed">This page needs JavaScript.</p></noscript>
+</body>
+</html>
